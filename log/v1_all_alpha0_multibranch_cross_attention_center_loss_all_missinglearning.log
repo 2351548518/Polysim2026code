@@ -1,0 +1,98 @@
+[INFO][Experiment] === Experiment started ===
+[INFO][Experiment] Train log file: ./log/v1_all_alpha0_multibranch_cross_attention_center_loss_all_missinglearning.log
+[INFO][Experiment] Full config snapshot for reproducibility:
+[INFO][Experiment]   alpha = 0
+[INFO][Experiment]   audio_aug_enabled = False
+[INFO][Experiment]   audio_aug_prob = 0.2
+[INFO][Experiment]   audio_dropout_prob = 0.1
+[INFO][Experiment]   audio_encoder = 'ecappa_feats_path'
+[INFO][Experiment]   audio_noise_std = 0.01
+[INFO][Experiment]   audio_scale_range = (0.9, 1.1)
+[INFO][Experiment]   batch_size = 32
+[INFO][Experiment]   branch_dropout = 0.1
+[INFO][Experiment]   branch_encoder = 'transformer'
+[INFO][Experiment]   branch_lstm_layers = 1
+[INFO][Experiment]   branch_num_tokens = 6
+[INFO][Experiment]   branch_transformer_heads = 4
+[INFO][Experiment]   branch_transformer_layers = 1
+[INFO][Experiment]   center_loss_weight = 0.15
+[INFO][Experiment]   consistency_on_branches = False
+[INFO][Experiment]   debug = False
+[INFO][Experiment]   device = 'cuda'
+[INFO][Experiment]   dropout_max = 0.5
+[INFO][Experiment]   dropout_min = 0.0
+[INFO][Experiment]   dropout_ramp_epochs = 30
+[INFO][Experiment]   embedding_dim = 512
+[INFO][Experiment]   exp_name = 'center_loss_all_missinglearning'
+[INFO][Experiment]   face_encoder = 'facenet_feats_path'
+[INFO][Experiment]   face_feature_boost = 0.95
+[INFO][Experiment]   face_rel_target = 0.7
+[INFO][Experiment]   fusion = 'cross_attention'
+[INFO][Experiment]   fusion_dropout = 0.1
+[INFO][Experiment]   fusion_lstm_layers = 1
+[INFO][Experiment]   fusion_transformer_heads = 4
+[INFO][Experiment]   grad_clip_norm = 0.0
+[INFO][Experiment]   home_dir = '/data2/home/daili/Challenge2026/2026polysim/feats'
+[INFO][Experiment]   kd_enabled = True
+[INFO][Experiment]   kd_temperature = 2.0
+[INFO][Experiment]   label_smoothing = 0.1
+[INFO][Experiment]   lambda_consistency = 0.0
+[INFO][Experiment]   lambda_face_rel = 0.1
+[INFO][Experiment]   lambda_kd = 0.2
+[INFO][Experiment]   lambda_sd_embed = 0.0
+[INFO][Experiment]   lambda_sd_logits = 0.0
+[INFO][Experiment]   log_dir = './log'
+[INFO][Experiment]   log_level = 20
+[INFO][Experiment]   loss_audio = 1.0
+[INFO][Experiment]   loss_face = 1.0
+[INFO][Experiment]   loss_fusion = 1.0
+[INFO][Experiment]   lr = 5e-05
+[INFO][Experiment]   lr_scheduler = ''
+[INFO][Experiment]   max_epochs = 24
+[INFO][Experiment]   model_type = 'multibranch'
+[INFO][Experiment]   num_workers = 0
+[INFO][Experiment]   p_a_only = 0.0
+[INFO][Experiment]   p_av = 1.0
+[INFO][Experiment]   reliability_eps = 1e-06
+[INFO][Experiment]   save_train_log = True
+[INFO][Experiment]   sd_temperature = 2.0
+[INFO][Experiment]   seed = 1
+[INFO][Experiment]   stage1_end = 0
+[INFO][Experiment]   stage2_end = 0
+[INFO][Experiment]   stage2_start = 0
+[INFO][Experiment]   stage3_dropout_fixed = 0.5
+[INFO][Experiment]   stage3_start = 0
+[INFO][Experiment]   use_class_weights = True
+[INFO][Experiment]   version = 'v1'
+[INFO][Experiment]   warmup_epochs = 0
+[INFO][Experiment]   weight_decay = 0.0001
+[INFO][Experiment] Seed=1 | Device=cuda | Model=multibranch | Fusion=cross_attention | Version=v1 | Train_Lang=English | #Classes=70 | Alpha=0.000
+[INFO][Experiment] Train CSV: ./csv_files/v1_train_English.csv
+[INFO][Experiment] Feature dimensions | Audio=192 | Face=512
+[INFO][Experiment] Model initialized | Params=10.71M
+[INFO][Experiment] === Training with alpha=0.000 ===
+[INFO][Experiment] [α=0.000] Epoch 000 | Loss 11.6403 | Rel(face/audio)=0.4982/0.4913 | MAD=0.525895 | p_drop=0.000
+[INFO][Experiment] [α=0.000] Epoch 001 | Loss 10.6712 | Rel(face/audio)=0.5088/0.4887 | MAD=0.559165 | p_drop=0.000
+[INFO][Experiment] [α=0.000] Epoch 002 | Loss 10.5505 | Rel(face/audio)=0.5164/0.4864 | MAD=0.519677 | p_drop=0.000
+[INFO][Experiment] [α=0.000] Epoch 003 | Loss 10.4628 | Rel(face/audio)=0.5205/0.4838 | MAD=0.482039 | p_drop=0.000
+[INFO][Experiment] [α=0.000] Epoch 004 | Loss 10.3832 | Rel(face/audio)=0.5214/0.4810 | MAD=0.451186 | p_drop=0.000
+[INFO][Experiment] [α=0.000] Epoch 005 | Loss 10.2968 | Rel(face/audio)=0.5216/0.4791 | MAD=0.424459 | p_drop=0.000
+[INFO][Experiment] [α=0.000] Epoch 006 | Loss 10.2271 | Rel(face/audio)=0.5217/0.4782 | MAD=0.400557 | p_drop=0.000
+[INFO][Experiment] [α=0.000] Epoch 007 | Loss 10.1453 | Rel(face/audio)=0.5226/0.4777 | MAD=0.379771 | p_drop=0.000
+[INFO][Experiment] [α=0.000] Epoch 008 | Loss 10.0672 | Rel(face/audio)=0.5232/0.4772 | MAD=0.362725 | p_drop=0.000
+[INFO][Experiment] [α=0.000] Epoch 009 | Loss 10.0021 | Rel(face/audio)=0.5239/0.4767 | MAD=0.346661 | p_drop=0.000
+[INFO][Experiment] [α=0.000] Epoch 010 | Loss 9.9417 | Rel(face/audio)=0.5250/0.4762 | MAD=0.332122 | p_drop=0.000
+[INFO][Experiment] [α=0.000] Epoch 011 | Loss 9.8599 | Rel(face/audio)=0.5262/0.4753 | MAD=0.319004 | p_drop=0.000
+[INFO][Experiment] [α=0.000] Epoch 012 | Loss 9.7892 | Rel(face/audio)=0.5269/0.4748 | MAD=0.307753 | p_drop=0.000
+[INFO][Experiment] [α=0.000] Epoch 013 | Loss 9.7277 | Rel(face/audio)=0.5283/0.4739 | MAD=0.296607 | p_drop=0.000
+[INFO][Experiment] [α=0.000] Epoch 014 | Loss 9.6493 | Rel(face/audio)=0.5294/0.4732 | MAD=0.284975 | p_drop=0.000
+[INFO][Experiment] [α=0.000] Epoch 015 | Loss 9.5786 | Rel(face/audio)=0.5305/0.4720 | MAD=0.275626 | p_drop=0.000
+[INFO][Experiment] [α=0.000] Epoch 016 | Loss 9.5116 | Rel(face/audio)=0.5318/0.4715 | MAD=0.265289 | p_drop=0.000
+[INFO][Experiment] [α=0.000] Epoch 017 | Loss 9.4457 | Rel(face/audio)=0.5332/0.4702 | MAD=0.256311 | p_drop=0.000
+[INFO][Experiment] [α=0.000] Epoch 018 | Loss 9.3751 | Rel(face/audio)=0.5345/0.4692 | MAD=0.246593 | p_drop=0.000
+[INFO][Experiment] [α=0.000] Epoch 019 | Loss 9.3133 | Rel(face/audio)=0.5357/0.4682 | MAD=0.238681 | p_drop=0.000
+[INFO][Experiment] [α=0.000] Epoch 020 | Loss 9.2358 | Rel(face/audio)=0.5370/0.4673 | MAD=0.230536 | p_drop=0.000
+[INFO][Experiment] [α=0.000] Epoch 021 | Loss 9.1702 | Rel(face/audio)=0.5382/0.4660 | MAD=0.222106 | p_drop=0.000
+[INFO][Experiment] [α=0.000] Epoch 022 | Loss 9.1039 | Rel(face/audio)=0.5390/0.4652 | MAD=0.213977 | p_drop=0.000
+[INFO][Experiment] [α=0.000] Epoch 023 | Loss 9.0356 | Rel(face/audio)=0.5403/0.4640 | MAD=0.207138 | p_drop=0.000
+[INFO][Experiment] === Experiment finished ===
