@@ -56,12 +56,17 @@ This submission **fully complies** with the [PolySIM Evaluation Protocols](./Pol
 
 ```bash
 git lfs install
-git clone <repo-url>
-cd 2026polysim
+
+git clone git@github.com:2351548518/Polysim2026code.git
+
+cd Polysim2026code
+
 git lfs pull
 
 conda create -n polysim python=3.10
+
 conda activate polysim
+
 pip install -r requirements.txt
 ```
 
