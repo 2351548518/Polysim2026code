@@ -32,13 +32,13 @@ This submission **fully complies** with the [PolySIM Evaluation Protocols](./Pol
 │   ├── featLoader.py    # Data loader
 │   ├── trainer.py       # Multi-stage trainer
 │   ├── losses.py        # OrthogonalProjectionLoss, CenterLoss
-│   └── post_process.py  # Post-processing: prototype refinement, Graph LP
+│   └── post_process.py  # Post-processing
 ├── checkpoints/         # Saved model checkpoint
 ├── csv_files/           # Training CSV and submission output
 ├── test_set/            # Test dataset
 │   ├── csv/comp/        # v1_test_English.csv, v1_test_Urdu.csv
 │   └── feat/            # Test feature files
-├── feats/               # Training feature files (English only, .npy)
+├── feats/               # Training feature files
 ├── log/                 # Training logs
 └── README.md
 ```
