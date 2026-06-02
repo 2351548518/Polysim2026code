@@ -6,11 +6,6 @@ import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
 
 
-# ================================================================
-# P3/P5 ：原型后处理
-# ================================================================
-
-# ── P3/P5 超参数 ──
 P3_CONFIDENCE_THRESHOLD = 0.3
 P5_CONFIDENCE_THRESHOLD = 0.4
 P3_RATIO_THRESHOLD = 1.1
@@ -34,7 +29,6 @@ def post_process_by_raw_prototype(f_raw, a_raw, preds, probs_tensor,
                                     probs_np, confidence_threshold, ratio_threshold,
                                     proto_f=None, proto_a=None, score_mode="sum",
                                     verbose=False):
-    """用原始特征原型做后处理。"""
     N_CLASSES = probs_tensor.shape[1]
 
     def l2(x):
@@ -88,13 +82,8 @@ def post_process_by_raw_prototype(f_raw, a_raw, preds, probs_tensor,
     return new_preds, {"n_total": len(preds), "n_low_conf": n_low, "n_changed": n_changed}
 
 
-# ================================================================
-# 训练集音频类中心
-# ================================================================
-
 def _build_audio_centroids(train_csv_path, audio_col='ecappa_feats_path',
                             label_col='label', feats_dir="./feats", verbose=True):
-    """从训练集构建 L2 归一化的音频类中心。"""
     train_df = pd.read_csv(train_csv_path)
 
     label_to_feats = {}
@@ -125,11 +114,6 @@ def _build_audio_centroids(train_csv_path, audio_col='ecappa_feats_path',
     return centroids_norm, labels_sorted
 
 
-# ================================================================
-# 扰动策略
-# ================================================================
-
-# ── 扰动超参数 ──
 PERTURB_GAMMA_EN = 3.0
 PERTURB_GAMMA_UR = 1.5
 PERTURB_PER_CLASS = True
@@ -138,7 +122,6 @@ PERTURB_PER_CLASS_CLAMP = (0.3, 3.0)
 
 def _compute_drift_from_pseudo_labels(train_centroids, test_audio_feats,
                                        pseudo_labels, n_classes, verbose=True):
-    """用伪标签在测试集上计算 per-class 中心，然后计算漂移向量。"""
     test_feats_np = F.normalize(test_audio_feats, dim=1).cpu().numpy().astype(np.float32)
 
     test_centroids = np.zeros((n_classes, test_feats_np.shape[1]), dtype=np.float32)
@@ -174,7 +157,6 @@ def _compute_drift_from_pseudo_labels(train_centroids, test_audio_feats,
 
 
 def _build_per_class_gamma(base_gamma, delta, mode="norm_sqrt", clamp=(0.3, 3.0)):
-    """根据每类的漂移大小计算 per-class gamma。"""
     if mode == "global":
         return np.full(delta.shape[0], base_gamma, dtype=np.float32)
     delta_norms = np.linalg.norm(delta, axis=1)
@@ -197,7 +179,6 @@ def _apply_perturb_drift(centroids_norm, drift_en_path=None, drift_ur_path=None,
                           per_class_mode=PERTURB_PER_CLASS_MODE,
                           per_class_clamp=PERTURB_PER_CLASS_CLAMP,
                           verbose=True):
-    """加载或使用传入的漂移向量并应用到训练中心。"""
     def _l2(x):
         norms = np.linalg.norm(x, axis=1, keepdims=True)
         return x / np.where(norms == 0, 1.0, norms)
@@ -248,7 +229,6 @@ def _apply_centroid_correction(predictions, confidences, audio_feats,
                                 centroids_norm, labels_sorted,
                                 confidence_threshold, margin_threshold,
                                 min_audio_sim, task_name="P4", verbose=True):
-    """对单组预测进行训练集类中心修正。"""
     predictions = np.array(predictions).astype(np.int64)
     confidences = np.array(confidences).astype(np.float64)
     audio_feats = np.array(audio_feats).astype(np.float32)
@@ -300,13 +280,8 @@ def _apply_centroid_correction(predictions, confidences, audio_feats,
     return corrected, stats
 
 
-# ================================================================
-# P4/P6 ：Graph Label Propagation
-# ================================================================
-
 def _build_lp_graph(embs, k, mutual=False, doubly_stochastic=False, ds_iters=20,
                     precomp_sim=None):
-    """从 L2 归一化的 embeddings 构建归一化 K-NN 亲和矩阵 S。"""
     n = embs.shape[0]
     sim = precomp_sim if precomp_sim is not None else embs @ embs.T
     np.fill_diagonal(sim, 0.0)
@@ -331,7 +306,6 @@ def graph_lp(labeled_embs, labeled_labels, unlabeled_embs, n_classes,
              k=15, alpha=0.99, n_iters=100, mutual=False,
              doubly_stochastic=False, precomp_sim=None, return_soft=False,
              raw_anchor_weight=0.0, raw_preds=None):
-    """经典半监督标签传播。"""
     n_l = labeled_embs.shape[0]
     all_embs = np.vstack([labeled_embs, unlabeled_embs]).astype(np.float32)
     S = _build_lp_graph(all_embs, k, mutual=mutual,
@@ -363,7 +337,6 @@ def graph_lp_ensemble(labeled_embs, labeled_labels, unlabeled_embs, n_classes,
                        k_list, alpha=0.9, n_iters=150, mutual=False,
                        doubly_stochastic=False, precomp_sim=None, verbose=True,
                        raw_anchor_weight=0.0, raw_preds=None, return_soft=False):
-    """多尺度 K-NN LP 集成。"""
     if verbose:
         has_anchor = raw_anchor_weight is not None and np.any(np.asarray(raw_anchor_weight) > 0)
         anchor_info = ""
@@ -390,27 +363,19 @@ def graph_lp_ensemble(labeled_embs, labeled_labels, unlabeled_embs, n_classes,
     return F_avg.argmax(axis=1)
 
 
-# ================================================================
-# P4/P6 Graph LP 后处理（主入口）
-# ================================================================
-
-# ── Graph LP 通用超参数 ──
 LP_ALPHA = 0.90
 LP_N_ITERS = 150
 
-# ── English (P4) ：多尺度 K 集成 ──
 LP_EN_ENSEMBLE = True
 LP_EN_K_LIST = [3, 5, 10, 20, 50]
 LP_EN_K_SINGLE = 10
 LP_RAW_ANCHOR_WEIGHT_EN = 0.03
 
-# ── Urdu (P6) ：单 K ──
 LP_UR_ENSEMBLE = False
 LP_UR_K_LIST = [5, 8, 12, 20, 50]
 LP_UR_K_SINGLE = 6
 LP_RAW_ANCHOR_WEIGHT_UR = 0.12
 
-# ── Audio-Similarity Guard ──
 LP_SIM_GUARD_MARGIN_EN = 0.01
 LP_SIM_GUARD_MARGIN_UR = 0.02
 LP_SIM_GUARD_CONF_EN = 0.50
@@ -421,17 +386,14 @@ LP_SIM_GUARD_P6_RULE1B = True
 LP_SIM_GUARD_P6_RULE1B_K = 5
 LP_SIM_GUARD_P6_RULE1B_MAX_RAW_CONF = 0.08
 
-# ── Audio-Centroid K-NN Override ──
 LP_CENTROID_KNN_CONF_THRESH = 0.50
 LP_CENTROID_KNN_MIN_SIM = 0.22
 LP_CENTROID_KNN_MARGIN_EN = 0.04
 LP_CENTROID_KNN_MARGIN_UR = 0.08
 LP_CENTROID_KNN_TOP1_TOP2_MARGIN_UR = 0.06
 
-# ── LP Softmax Confidence Filter ──
 LP_SOFT_CONF_THRESH = 0.03
 
-# ── Graph LP 模式 ──
 P4_P6_LP_MODE = "train_anchors_perturbed"
 
 def post_process_p4_p6_graph_lp(p4_pred, p6_pred,
@@ -466,7 +428,6 @@ def post_process_p4_p6_graph_lp(p4_pred, p6_pred,
                                 p4_ae_train_protos=None,
                                 ae_lp_en=False,
                                 verbose=True):
-    """P4/P6 基于 Graph LP 的后处理。"""
     if train_csv_path is None:
         train_csv_path = "./csv_files/v1_train_English.csv"
 
@@ -523,7 +484,6 @@ def post_process_p4_p6_graph_lp(p4_pred, p6_pred,
                 return soft
             return soft.argmax(axis=1)
 
-    # ── P4: English ──
     p4_soft = None
     if ae_lp_en and p4_ae_embed is not None and p4_ae_train_protos is not None:
         p4_ae_np = F.normalize(p4_ae_embed, dim=1).cpu().numpy().astype(np.float32)
@@ -544,7 +504,6 @@ def post_process_p4_p6_graph_lp(p4_pred, p6_pred,
                          return_soft=True)
         p4_lp = np.array([labels_sorted[i] for i in p4_soft.argmax(axis=1)], dtype=np.int64)
 
-    # ── P6: Urdu ──
     p6_soft = _run_lp(p6_centroids, ur_audio_np, "P6", ur_ensemble,
                      ur_k_list, ur_k_single,
                      raw_preds_np=np.array(p6_pred).astype(np.int64),
@@ -552,7 +511,6 @@ def post_process_p4_p6_graph_lp(p4_pred, p6_pred,
                      return_soft=True)
     p6_lp = np.array([labels_sorted[i] for i in p6_soft.argmax(axis=1)], dtype=np.int64)
 
-    # ── Audio-Similarity Guard ──
     if p4_conf is not None and p6_conf is not None:
         label2idx = {int(l): i for i, l in enumerate(labels_sorted)}
 
@@ -622,7 +580,6 @@ def post_process_p4_p6_graph_lp(p4_pred, p6_pred,
                            rule1b_k=sim_guard_p6_rule1b_k,
                            rule1b_max_raw_conf=sim_guard_p6_rule1b_max_raw_conf)
 
-    # ── LP Softmax Confidence Filter ──
     if p4_conf is not None and p6_conf is not None \
        and p4_soft is not None and p6_soft is not None:
         p4_raw = np.array(p4_pred).astype(np.int64)
@@ -641,7 +598,6 @@ def post_process_p4_p6_graph_lp(p4_pred, p6_pred,
         p4_lp = _lp_soft_filter(p4_lp, p4_raw, p4_soft, "P4")
         p6_lp = _lp_soft_filter(p6_lp, p6_raw, p6_soft, "P6")
 
-    # ── Audio-Centroid K-NN Override ──
     if p4_conf is not None and p6_conf is not None:
         label2idx = {int(l): i for i, l in enumerate(labels_sorted)}
 
@@ -695,10 +651,6 @@ def post_process_p4_p6_graph_lp(p4_pred, p6_pred,
     return p4_lp, p6_lp
 
 
-# ================================================================
-# Centroid 修正模式（P4_P6_LP_MODE = "centroid" 时使用）
-# ================================================================
-
 def post_process_p4_p6_centroid(p4_pred, p6_pred,
                                  english_audio_emb, urdu_audio_emb,
                                  p4_confidence, p6_confidence,
@@ -709,7 +661,6 @@ def post_process_p4_p6_centroid(p4_pred, p6_pred,
                                  centroids_norm=None,
                                  labels_sorted=None,
                                  verbose=True):
-    """P4/P6 基于训练集音频类中心的后处理。"""
     if train_csv_path is None:
         train_csv_path = "./csv_files/v1_train_English.csv"
 
@@ -747,10 +698,6 @@ def post_process_p4_p6_centroid(p4_pred, p6_pred,
     return p4_corrected, p6_corrected
 
 
-# ================================================================
-# 统一后处理入口：封装所有后处理步骤
-# ================================================================
-
 def run_all_post_processing(
     en_f_raw, en_a_raw, ur_f_raw, ur_a_raw,
     p3_pred, p3_probs, p3_prob,
@@ -761,27 +708,9 @@ def run_all_post_processing(
     model=None, device=None, n_classes=None, face_dim=None,
     train_csv_path=None, verbose=False,
 ):
-    """运行全部后处理流程：P3 → P5 → P4/P6 Graph LP。
-
-    Args:
-        en_f_raw, en_a_raw: English 原始 face/audio 特征 [N_en, D]
-        ur_f_raw, ur_a_raw: Urdu 原始 face/audio 特征 [N_ur, D]
-        p3_pred/p3_probs/p3_prob: P3 预测 / softmax 矩阵 / 置信度
-        p4_pred/p4_prob/p4_audio_embed: P4 预测 / 置信度 / 512 维 audio_embed
-        p5_pred/p5_probs/p5_prob: P5 预测 / softmax 矩阵 / 置信度
-        p6_pred/p6_prob: P6 预测 / 置信度
-        english_audio_feats, urdu_audio_feats: 模型输入音频特征 (torch tensor)
-        model, device, n_classes, face_dim: 用于可选的 audio_embed 原型构建
-        train_csv_path: 训练集 CSV 路径（centroids 构建用）
-        verbose: 是否打印详细日志
-
-    Returns:
-        (p3_pred, p4_pred, p5_pred, p6_pred) — 后处理后的预测
-    """
     if train_csv_path is None:
         train_csv_path = "./csv_files/v1_train_English.csv"
 
-    # ── P3 后处理（product mode） ──
     if verbose:
         print("\n" + "=" * 60)
         print("STEP 2: P3 Post-Processing (product mode)")
@@ -796,7 +725,6 @@ def run_all_post_processing(
         print(f"  P3: {p3_stats['n_total']} total | {p3_stats['n_low_conf']} low-conf "
               f"| {p3_stats['n_changed']} changed")
 
-    # ── P5 后处理（Urdu-only） ──
     if verbose:
         print("\n" + "=" * 60)
         print("STEP 3: P5 Post-Processing (Urdu-only)")
@@ -811,7 +739,6 @@ def run_all_post_processing(
         print(f"  P5: {p5_stats['n_total']} total | {p5_stats['n_low_conf']} low-conf "
               f"| {p5_stats['n_changed']} changed")
 
-    # ── 构建训练集类中心 + perturb drift（用 P3/P5 伪标签） ──
     if verbose:
         print("\n" + "=" * 60)
         print("STEP 3.4: Build train centroids & compute perturb drift from P3/P5 (in-memory)")
@@ -822,7 +749,6 @@ def run_all_post_processing(
     delta_ur = _compute_drift_from_pseudo_labels(
         centroids_norm, urdu_audio_feats, p5_pred, n_classes, verbose=verbose)
 
-    # ── P4/P6 Graph LP 后处理 ──
     if verbose:
         print("\n" + "=" * 60)
     if P4_P6_LP_MODE == "train_anchors_perturbed":
